@@ -25,14 +25,8 @@ export const BarcodeScanner = ({
 					decoder: {
 						readers: ['code_128_reader'],
 					},
-					debug: {
-						drawBoundingBox: true,
-						showFrequency: false,
-						drawScanline: false,
-						showPattern: false,
-					},
 				} as any,
-				function (err) {
+				err => {
 					if (err) {
 						console.log(err);
 						return;
