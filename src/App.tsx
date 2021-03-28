@@ -21,7 +21,7 @@ const BarCode = styled.h1`
 	margin: 6rem 0;
 	font-size: 3rem;
 	@media (max-width: 500px) {
-		margin: 1rem 0;
+		margin: 2rem 0;
 	}
 `;
 
