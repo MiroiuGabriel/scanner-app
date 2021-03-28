@@ -47,7 +47,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 			);
 
 			Quagga.onDetected(data => {
-				if (data.codeResult.startInfo.error <= 0.1) {
+				if (data.codeResult.startInfo.error <= 0.2) {
 					savedCallback.current(data.codeResult.code);
 				}
 			});
