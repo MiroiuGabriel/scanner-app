@@ -1,56 +1,56 @@
-import React, { useEffect } from 'react';
-import { BrowserMultiFormatReader, Result } from '@zxing/library';
-import Webcam from 'react-webcam';
-
-const codeReader = new BrowserMultiFormatReader();
+import React, { useEffect, useRef } from 'react';
+import Quagga from 'quagga';
 
 export const BarcodeScanner = ({
-	width,
-	height,
-	onUpdate,
+	onCodeDetected,
 }: {
-	width: number | string;
-	height: number | string;
-	onUpdate: (result: Result | null, error?: unknown) => void;
+	onCodeDetected: (result: string) => void;
 }): React.ReactElement => {
-	const webcamRef = React.useRef<Webcam>(null);
-	const savedCallback = React.useRef(onUpdate);
+	const savedCallback = useRef(onCodeDetected);
+	const videoRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		savedCallback.current = onUpdate;
-	}, [onUpdate]);
+		savedCallback.current = onCodeDetected;
+	}, [onCodeDetected]);
 
-	const capture = React.useCallback(() => {
-		const imageSrc = webcamRef?.current?.getScreenshot();
-		if (imageSrc) {
-			codeReader
-				.decodeFromImage(undefined, imageSrc)
-				.then(result => {
-					savedCallback.current(result);
-				})
-				.catch(err => {
-					savedCallback.current(null, err);
-				});
+	useEffect(() => {
+		if (videoRef.current) {
+			Quagga.init(
+				{
+					inputStream: {
+						name: 'Live',
+						type: 'LiveStream',
+						target: videoRef.current,
+					},
+					decoder: {
+						readers: ['code_128_reader'],
+					},
+					debug: {
+						drawBoundingBox: true,
+						showFrequency: false,
+						drawScanline: false,
+						showPattern: false,
+					},
+				} as any,
+				function (err) {
+					if (err) {
+						console.log(err);
+						return;
+					}
+					console.log('Initialization finished. Ready to start');
+					Quagga.start();
+				}
+			);
+
+			Quagga.onDetected(data => {
+				if (data.codeResult.startInfo.error <= 0.04) {
+					savedCallback.current(data.codeResult.code);
+				}
+			});
+
+			return () => Quagga.stop();
 		}
 	}, []);
 
-	React.useEffect(() => {
-		const id = setInterval(capture, 100);
-		return () => clearInterval(id);
-	}, [capture]);
-
-	return (
-		<Webcam
-			width={width}
-			height={height}
-			ref={webcamRef}
-			screenshotFormat="image/jpeg"
-			audio={false}
-			videoConstraints={{
-				facingMode: { ideal: 'environment' },
-			}}
-		/>
-	);
+	return <div ref={videoRef}></div>;
 };
-
-export type ScanResult = Result | null;
