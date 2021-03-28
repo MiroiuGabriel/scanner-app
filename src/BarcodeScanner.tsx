@@ -1,11 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import Quagga from 'quagga';
 
-export const BarcodeScanner = ({
-	onCodeDetected,
-}: {
+export type BarcodeScannerProps = {
 	onCodeDetected: (result: string) => void;
-}): React.ReactElement => {
+	className?: string;
+};
+
+export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
+	onCodeDetected,
+	className,
+}) => {
 	const savedCallback = useRef(onCodeDetected);
 	const videoRef = useRef<HTMLDivElement>(null);
 
@@ -21,6 +25,9 @@ export const BarcodeScanner = ({
 						name: 'Live',
 						type: 'LiveStream',
 						target: videoRef.current,
+						constraints: {
+							facingMode: 'environment',
+						},
 					},
 					decoder: {
 						readers: ['code_128_reader'],
@@ -49,5 +56,5 @@ export const BarcodeScanner = ({
 		}
 	}, []);
 
-	return <div ref={videoRef}></div>;
+	return <div className={className} ref={videoRef}></div>;
 };
