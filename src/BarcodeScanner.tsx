@@ -1,35 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserMultiFormatReader, Result } from '@zxing/library';
 import Webcam from 'react-webcam';
 
-const BarcodeScanner = ({
+const codeReader = new BrowserMultiFormatReader();
+
+export const BarcodeScanner = ({
 	width,
 	height,
 	onUpdate,
 }: {
-	width: number;
-	height: number;
-	onUpdate: (arg0: unknown, arg1?: Result) => void;
+	width: number | string;
+	height: number | string;
+	onUpdate: (result: Result | null, error?: unknown) => void;
 }): React.ReactElement => {
 	const webcamRef = React.useRef<Webcam>(null);
+	const savedCallback = React.useRef(onUpdate);
+
+	useEffect(() => {
+		savedCallback.current = onUpdate;
+	}, [onUpdate]);
 
 	const capture = React.useCallback(() => {
 		const imageSrc = webcamRef?.current?.getScreenshot();
 		if (imageSrc) {
-			const codeReader = new BrowserMultiFormatReader();
 			codeReader
 				.decodeFromImage(undefined, imageSrc)
 				.then(result => {
-					onUpdate(null, result);
+					savedCallback.current(result);
 				})
 				.catch(err => {
-					onUpdate(err);
+					savedCallback.current(null, err);
 				});
 		}
-	}, [onUpdate]);
+	}, []);
 
 	React.useEffect(() => {
-		setInterval(capture, 100);
+		const id = setInterval(capture, 100);
+		return () => clearInterval(id);
 	}, [capture]);
 
 	return (
@@ -37,14 +44,13 @@ const BarcodeScanner = ({
 			width={width}
 			height={height}
 			ref={webcamRef}
-			screenshotFormat="image/png"
+			screenshotFormat="image/jpeg"
+			audio={false}
 			videoConstraints={{
-				facingMode: {
-					ideal: 'environment',
-				},
+				facingMode: { ideal: 'environment' },
 			}}
 		/>
 	);
 };
 
-export default BarcodeScanner;
+export type ScanResult = Result | null;
