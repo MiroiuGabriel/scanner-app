@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from 'react';
+import BarcodeScanner from './BarcodeScanner';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const [data, setData] = useState('');
+	const [scannerSize, setScannerSize] = useState({
+		width: window.innerWidth,
+		height: window.innerHeight,
+	});
+
+	useEffect(() => {
+		const onResize = () => {
+			setScannerSize({ width: window.innerWidth, height: window.innerHeight });
+		};
+
+		window.addEventListener('resize', onResize);
+		return () => window.removeEventListener('resize', onResize);
+	}, []);
+
+	return (
+		<div style={{ height: '100%', overflow: 'hidden', position: 'absolute' }}>
+			{!data && (
+				<BarcodeScanner
+					width={scannerSize.width}
+					height={scannerSize.height}
+					onUpdate={(err, result) => {
+						if (result) setData(result.getText());
+					}}
+				/>
+			)}
+			{/* <p>{data || 'Not found'}</p> */}
+		</div>
+	);
 }
 
 export default App;
