@@ -168,7 +168,7 @@ const SumbitButton = styled.div`
 	color: #fff;
 	outline: none;
 	border-radius: 7px;
-	margin-top: 5rem;
+	margin-top: 3rem;
 	cursor: pointer;
 	user-select: none;
 	&:hover {
