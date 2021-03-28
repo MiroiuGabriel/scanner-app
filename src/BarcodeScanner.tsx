@@ -32,7 +32,19 @@ const BarcodeScanner = ({
 		setInterval(capture, 100);
 	}, [capture]);
 
-	return <Webcam width={width} height={height} ref={webcamRef} screenshotFormat="image/png" />;
+	return (
+		<Webcam
+			width={width}
+			height={height}
+			ref={webcamRef}
+			screenshotFormat="image/png"
+			videoConstraints={{
+				facingMode: {
+					exact: 'environment',
+				},
+			}}
+		/>
+	);
 };
 
 export default BarcodeScanner;
