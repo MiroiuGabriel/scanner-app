@@ -25,6 +25,9 @@ export const BarcodeScanner = ({
 					decoder: {
 						readers: ['code_128_reader'],
 					},
+					locate: true,
+					halfSample: true,
+					patchSize: 'large', // x-small, small, medium, large, x-large
 				} as any,
 				err => {
 					if (err) {
@@ -37,7 +40,7 @@ export const BarcodeScanner = ({
 			);
 
 			Quagga.onDetected(data => {
-				if (data.codeResult.startInfo.error <= 0.04) {
+				if (data.codeResult.startInfo.error <= 0.1) {
 					savedCallback.current(data.codeResult.code);
 				}
 			});
