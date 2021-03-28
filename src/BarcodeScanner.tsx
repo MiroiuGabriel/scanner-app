@@ -12,11 +12,11 @@ const BarcodeScanner = ({
 	onUpdate: (arg0: unknown, arg1?: Result) => void;
 }): React.ReactElement => {
 	const webcamRef = React.useRef<Webcam>(null);
-	const codeReader = new BrowserMultiFormatReader();
 
 	const capture = React.useCallback(() => {
 		const imageSrc = webcamRef?.current?.getScreenshot();
 		if (imageSrc) {
+			const codeReader = new BrowserMultiFormatReader();
 			codeReader
 				.decodeFromImage(undefined, imageSrc)
 				.then(result => {
@@ -26,11 +26,11 @@ const BarcodeScanner = ({
 					onUpdate(err);
 				});
 		}
-	}, [codeReader, onUpdate]);
+	}, [onUpdate]);
 
 	React.useEffect(() => {
 		setInterval(capture, 100);
-	}, []);
+	}, [capture]);
 
 	return <Webcam width={width} height={height} ref={webcamRef} screenshotFormat="image/png" />;
 };
