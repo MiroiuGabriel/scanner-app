@@ -40,7 +40,7 @@ const BarcodeScanner = ({
 			screenshotFormat="image/png"
 			videoConstraints={{
 				facingMode: {
-					exact: 'environment',
+					ideal: 'environment',
 				},
 			}}
 		/>
