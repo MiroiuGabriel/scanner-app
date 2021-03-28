@@ -20,6 +20,9 @@ const BarCode = styled.h1`
 	letter-spacing: 5px;
 	margin: 6rem 0;
 	font-size: 3rem;
+	@media (max-width: 500px) {
+		margin: 1rem 0;
+	}
 `;
 
 const Submit = styled.button`
