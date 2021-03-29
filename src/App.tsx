@@ -391,19 +391,17 @@ function App() {
 			dataObject={serverData}
 			handleSubmit={handleSubmit}
 		></ProductVerification>
-	) : showVideoMask ? (
-		<ScanCodeWrapper>
-			<BarCode>{barcode}</BarCode>
-			<MaskBarcodeScanner>Conecteaza o camera</MaskBarcodeScanner>
-			<div>{show}</div>
-			<Submit onClick={checkProduct}>Verifica Produsul</Submit>
-		</ScanCodeWrapper>
 	) : (
 		<ScanCodeWrapper>
 			<BarCode>{barcode}</BarCode>
-			<BarcodeScannerWrapper>
-				<BarcodeScanner onCodeDetected={setBarcode} />
-			</BarcodeScannerWrapper>
+			{!showVideoMask ? (
+				<BarcodeScannerWrapper>
+					<BarcodeScanner onCodeDetected={setBarcode} />
+				</BarcodeScannerWrapper>
+			) : (
+				<MaskBarcodeScanner>Conecteaza o camera</MaskBarcodeScanner>
+			)}
+
 			<div>{show}</div>
 			<Submit onClick={checkProduct}>Verifica Produsul</Submit>
 		</ScanCodeWrapper>
