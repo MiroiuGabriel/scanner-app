@@ -1,7 +1,9 @@
-import { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BarcodeScanner } from './BarcodeScanner';
 import styled from '@emotion/styled';
 import { HashLoader } from 'react-spinners';
+import { createPortal } from 'react-dom';
+import { keyframes } from '@emotion/react';
 
 const BarcodeScannerWrapper = styled.div`
 	display: flex;
@@ -160,8 +162,11 @@ const ProductProperty: React.FC<ProductPropertyProps> = ({
 		</ProductPropertyWrapper>
 	);
 };
-const SumbitButton = styled.div`
-	background-color: #006400;
+const SumbitButton = styled.div<{
+	backgroundColor?: string;
+	hoverColor?: string;
+}>`
+	background-color: ${props => props.backgroundColor ?? '#006400'};
 	padding: 1rem;
 	font-size: 1.5rem;
 	font-weight: 600;
@@ -171,22 +176,74 @@ const SumbitButton = styled.div`
 	margin-top: 3rem;
 	cursor: pointer;
 	user-select: none;
+	margin: 0 2rem;
 	&:hover {
-		background-color: #075607;
+		background-color: ${props => props.hoverColor ?? '#075607'};
 	}
 `;
 
 const SubmitButtonWrapper = styled.div`
-	width: fit-content;
+	display: flex;
+	justify-content: center;
 	margin: 0 auto;
 	padding-top: 9rem;
 `;
+
+const FaultyModalWrapper = styled.div`
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.7);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+`;
+const reveal = keyframes`
+	from{
+		transform:translateY(100%);
+	}
+	to{
+		transform:translateY(0);
+	}
+`;
+const ModalWrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 500px;
+	height: 500px;
+	background-color: #fff;
+	color: #000;
+	border-radius: 7px;
+	animation: ${reveal} 0.6s ease;
+	padding: 1.5rem;
+	@media (max-width: 500px) {
+		height: 100vh;
+		justify-content: center;
+	}
+`;
+
+const ConfirmButtonWrapper = styled.div`
+	display: flex;
+	justify-content: center;
+	margin-top: 2rem;
+`;
+
+const modalRoot = document.getElementById('modal-root') as HTMLElement;
+
+const Modal: React.FC<{ isOpen: boolean }> = ({ children, isOpen }) => {
+	if (!isOpen) return null;
+	return createPortal(<div>{children}</div>, modalRoot);
+};
 
 const ProductVerification: React.FC<ProductVerificationProps> = ({
 	dataObject,
 	handleSubmit,
 }) => {
 	const [items, setItems] = useState(dataObject);
+	const [isOpen, setIsOpen] = useState(false);
 	console.log(items);
 	const handleCheck = useCallback(
 		id => {
@@ -200,6 +257,12 @@ const ProductVerification: React.FC<ProductVerificationProps> = ({
 		},
 		[items]
 	);
+	const openFaultyModal = () => {
+		setIsOpen(true);
+	};
+	const closeFaultyModal = () => {
+		setIsOpen(false);
+	};
 	return (
 		<ProductVerificationWrapper>
 			{items.map(item => (
@@ -211,36 +274,109 @@ const ProductVerification: React.FC<ProductVerificationProps> = ({
 				></ProductProperty>
 			))}
 			<SubmitButtonWrapper>
+				<SumbitButton
+					onClick={openFaultyModal}
+					backgroundColor="#FF0000"
+					hoverColor="#af1919"
+				>
+					Defecte
+				</SumbitButton>
 				<SumbitButton onClick={handleSubmit}>Trimite</SumbitButton>
 			</SubmitButtonWrapper>
+			<Modal isOpen={isOpen}>
+				<FaultyModalWrapper>
+					<ModalWrapper>
+						{items.map(item => (
+							// <h1 key={item.id}>{item.title}</h1>
+							<ProductProperty
+								key={item.id}
+								item={item}
+								handleCheck={handleCheck}
+							></ProductProperty>
+						))}
+						<ConfirmButtonWrapper>
+							<SumbitButton onClick={closeFaultyModal}>
+								Confirma
+							</SumbitButton>
+						</ConfirmButtonWrapper>
+					</ModalWrapper>
+				</FaultyModalWrapper>
+			</Modal>
 		</ProductVerificationWrapper>
 	);
 };
+
+const MaskBarcodeScanner = styled.div`
+	width: 640px;
+	height: 480px;
+	background-color: #000;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 2rem;
+	@media (max-width: 668px) {
+		width: 600px;
+		height: 480px;
+	}
+	@media (max-width: 641px) {
+		width: 400px;
+		height: 480px;
+	}
+	@media (max-width: 360px) {
+		width: 360px;
+		height: 340px;
+	}
+`;
 
 function App() {
 	const [barcode, setBarcode] = useState('SCANEAZA');
 	const [isLoading, setIsLoading] = useState(false);
 	const [serverData, setServerData] = useState<ServerDataItem[] | null>(null);
+	const [showVideoMask, setShowVideoMask] = useState(true);
+
 	const handleSubmit = useCallback(() => {
 		setIsLoading(true);
 		setTimeout(() => {
 			setIsLoading(false);
 			setServerData(null);
-			setBarcode('SCANEAZA ALT PRODUS');
 		}, 2000);
 	}, []);
+
+	useEffect(() => {
+		navigator.getUserMedia(
+			// constraints
+			{
+				video: true,
+			},
+			// successCallback
+			function () {
+				setShowVideoMask(false);
+			},
+			// errorCallback
+			function (err) {
+				if (err) {
+					console.log(err);
+				}
+			}
+		);
+	}, []);
 	const checkProduct = useCallback(async () => {
-		setIsLoading(true);
-		try {
-			const response = await fetch(
-				`http://localhost:3000/product?code=${barcode}`
-			);
-			const data = await response.json();
-			setServerData(data);
-		} catch {
-			console.log('failed');
+		if (barcode !== 'SCANEAZA') {
+			//  !==
+			setIsLoading(true);
+			try {
+				const response = await fetch(
+					`http://localhost:3000/product?code=${barcode}`
+				);
+				const data = await response.json();
+				setServerData(data);
+			} catch {
+				console.log('failed');
+			}
+			setIsLoading(false);
+		} else {
+			alert('Scaneaza un cod inainte de a verifica');
 		}
-		setIsLoading(false);
 	}, [barcode]);
 
 	return isLoading ? (
@@ -252,6 +388,12 @@ function App() {
 			dataObject={serverData}
 			handleSubmit={handleSubmit}
 		></ProductVerification>
+	) : showVideoMask ? (
+		<ScanCodeWrapper>
+			<BarCode>{barcode}</BarCode>
+			<MaskBarcodeScanner>Conecteaza o camera</MaskBarcodeScanner>
+			<Submit onClick={checkProduct}>Verifica Produsul</Submit>
+		</ScanCodeWrapper>
 	) : (
 		<ScanCodeWrapper>
 			<BarCode>{barcode}</BarCode>
