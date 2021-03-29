@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { BarcodeScanner } from './BarcodeScanner';
 import styled from '@emotion/styled';
 import { HashLoader } from 'react-spinners';
@@ -306,33 +306,33 @@ const ProductVerification: React.FC<ProductVerificationProps> = ({
 	);
 };
 
-const MaskBarcodeScanner = styled.div`
-	width: 640px;
-	height: 480px;
-	background-color: #000;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 2rem;
-	@media (max-width: 668px) {
-		width: 600px;
-		height: 480px;
-	}
-	@media (max-width: 641px) {
-		width: 400px;
-		height: 480px;
-	}
-	@media (max-width: 360px) {
-		width: 360px;
-		height: 340px;
-	}
-`;
+// const MaskBarcodeScanner = styled.div`
+// 	width: 640px;
+// 	height: 480px;
+// 	background-color: #000;
+// 	display: flex;
+// 	justify-content: center;
+// 	align-items: center;
+// 	font-size: 2rem;
+// 	@media (max-width: 668px) {
+// 		width: 600px;
+// 		height: 480px;
+// 	}
+// 	@media (max-width: 641px) {
+// 		width: 400px;
+// 		height: 480px;
+// 	}
+// 	@media (max-width: 360px) {
+// 		width: 360px;
+// 		height: 340px;
+// 	}
+// `;
 
 function App() {
 	const [barcode, setBarcode] = useState('SCANEAZA');
 	const [isLoading, setIsLoading] = useState(false);
 	const [serverData, setServerData] = useState<ServerDataItem[] | null>(null);
-	const [showVideoMask, setShowVideoMask] = useState(true);
+	// const [showVideoMask, setShowVideoMask] = useState(true);
 
 	const handleSubmit = useCallback(() => {
 		setIsLoading(true);
@@ -343,25 +343,25 @@ function App() {
 		}, 2000);
 	}, []);
 
-	useEffect(() => {
-		navigator.getUserMedia(
-			// constraints
-			{
-				video: true,
-				audio: true,
-			},
-			// successCallback
-			function () {
-				setShowVideoMask(false);
-			},
-			// errorCallback
-			function (err) {
-				if (err) {
-					console.log(err);
-				}
-			}
-		);
-	}, []);
+	// useEffect(() => {
+	// 	navigator.getUserMedia(
+	// 		// constraints
+	// 		{
+	// 			video: true,
+	// 			audio: true,
+	// 		},
+	// 		// successCallback
+	// 		function () {
+	// 			setShowVideoMask(false);
+	// 		},
+	// 		// errorCallback
+	// 		function (err) {
+	// 			if (err) {
+	// 				console.log(err);
+	// 			}
+	// 		}
+	// 	);
+	// }, []);
 	const checkProduct = useCallback(async () => {
 		if (barcode !== 'SCANEAZA') {
 			//  !==
@@ -393,13 +393,13 @@ function App() {
 	) : (
 		<ScanCodeWrapper>
 			<BarCode>{barcode}</BarCode>
-			{!showVideoMask ? (
-				<BarcodeScannerWrapper>
-					<BarcodeScanner onCodeDetected={setBarcode} />
-				</BarcodeScannerWrapper>
-			) : (
+			{/* {!showVideoMask ? ( */}
+			<BarcodeScannerWrapper>
+				<BarcodeScanner onCodeDetected={setBarcode} />
+			</BarcodeScannerWrapper>
+			{/* ) : (
 				<MaskBarcodeScanner>Conecteaza o camera</MaskBarcodeScanner>
-			)}
+			)} */}
 
 			<Submit onClick={checkProduct}>Verifica Produsul</Submit>
 		</ScanCodeWrapper>
