@@ -336,6 +336,7 @@ function App() {
 
 	const handleSubmit = useCallback(() => {
 		setIsLoading(true);
+		setBarcode('SCANEAZA');
 		setTimeout(() => {
 			setIsLoading(false);
 			setServerData(null);
