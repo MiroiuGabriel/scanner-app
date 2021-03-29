@@ -332,6 +332,7 @@ function App() {
 	const [barcode, setBarcode] = useState('SCANEAZA');
 	const [isLoading, setIsLoading] = useState(false);
 	const [serverData, setServerData] = useState<ServerDataItem[] | null>(null);
+	const [show, setShow] = useState('nu merge');
 	const [showVideoMask, setShowVideoMask] = useState(true);
 
 	const handleSubmit = useCallback(() => {
@@ -352,6 +353,7 @@ function App() {
 			// successCallback
 			function () {
 				setShowVideoMask(false);
+				setShow('merge');
 			},
 			// errorCallback
 			function (err) {
@@ -393,6 +395,7 @@ function App() {
 		<ScanCodeWrapper>
 			<BarCode>{barcode}</BarCode>
 			<MaskBarcodeScanner>Conecteaza o camera</MaskBarcodeScanner>
+			<div>{show}</div>
 			<Submit onClick={checkProduct}>Verifica Produsul</Submit>
 		</ScanCodeWrapper>
 	) : (
@@ -401,6 +404,7 @@ function App() {
 			<BarcodeScannerWrapper>
 				<BarcodeScanner onCodeDetected={setBarcode} />
 			</BarcodeScannerWrapper>
+			<div>{show}</div>
 			<Submit onClick={checkProduct}>Verifica Produsul</Submit>
 		</ScanCodeWrapper>
 	);
